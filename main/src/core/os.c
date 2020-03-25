@@ -31,7 +31,7 @@ void _init(void) {}
 
 void os_start(void)
 {
-    OS_LOGI(TAG, "Starting scheduler.");
+    OS_LOGI(TAG, "Starting scheduler...");
 
     vTaskStartScheduler();
 }

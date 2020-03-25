@@ -12,6 +12,10 @@
 
 #include "tusb.h"
 
+#include "core/os.h"
+
+#define TAG "usbd"
+
 #define USBD_STACK_SIZE 150
 
 static StackType_t stack_usbd[USBD_STACK_SIZE];
@@ -21,6 +25,10 @@ void usbd_task(void *pvParameter)
 {
     (void)pvParameter;
 
+    OS_LOGI(TAG, "started.");
+
+    tusb_init();
+
     while (1) {
         tud_task();
     }
@@ -28,7 +36,5 @@ void usbd_task(void *pvParameter)
 
 void usbd_init(void)
 {
-    tusb_init();
-
     xTaskCreateStatic(usbd_task, "usbdT", USBD_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, stack_usbd, &static_task_usbd);
 }

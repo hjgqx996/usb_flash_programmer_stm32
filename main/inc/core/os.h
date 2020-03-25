@@ -8,6 +8,8 @@
 #ifndef INC_CORE_OS_H_
 #define INC_CORE_OS_H_
 
+#include <stdio.h>
+
 #include "FreeRTOS.h"
 
 #define LOG_COLOR_BLACK   "30"

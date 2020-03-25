@@ -12,7 +12,10 @@
 
 #include "tusb.h"
 
+#include "core/os.h"
 #include "user/mtd.h"
+
+#define TAG "usbd_cdc"
 
 #define CDC_STACK_SIZE 256
 
@@ -25,11 +28,15 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
     (void)itf;
 
     if (dtr && rts) {
+        OS_LOGI(TAG, "connected.");
+
         tud_cdc_read_flush();
         tud_cdc_write_flush();
     }
 
     if (!dtr && !rts) {
+        OS_LOGI(TAG, "disconnected.");
+
         mtd_end();
 
         tud_cdc_read_flush();
@@ -49,6 +56,8 @@ void usbd_cdc_task(void *pvParameter)
     uint8_t data[64] = {0};
     uint32_t size = 0;
     uint16_t count = 0;
+
+    OS_LOGI(TAG, "started.");
 
     while (1) {
         if (tud_cdc_connected()) {

@@ -10,6 +10,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "core/os.h"
 #include "board/led.h"
 
 #define TAG "led"
@@ -41,6 +42,8 @@ static void led_task(void *pvParameter)
 
     uint16_t i = 0;
     portTickType xLastWakeTime;
+
+    OS_LOGI(TAG, "started.");
 
     while (1) {
         xLastWakeTime = xTaskGetTickCount();
