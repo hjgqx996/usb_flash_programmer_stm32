@@ -28,10 +28,10 @@
 
 /* DEVICE CONFIGURATION */
 
-#define CFG_TUD_ENDPOINT0_SIZE  64
-
 // Class
-#define CFG_TUD_CDC         1
+#define CFG_TUD_CDC 1
+
+#define CFG_TUD_ENDPOINT0_SIZE  64
 
 // CDC FIFO size of TX and RX
 #define CFG_TUD_CDC_RX_BUFSIZE  64

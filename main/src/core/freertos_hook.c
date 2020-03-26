@@ -5,24 +5,22 @@
  *      Author: Jack Chen <redchenjs@live.com>
  */
 
+#include <stdio.h>
+
 #include "FreeRTOS.h"
 #include "task.h"
 
 #include "common/tusb_common.h"
 
-void vApplicationMallocFailedHook(void)
-{
-    taskDISABLE_INTERRUPTS();
-    TU_ASSERT(false, );
-}
-
 void vApplicationStackOverflowHook(xTaskHandle pxTask, signed char *pcTaskName)
 {
     (void)pxTask;
-    (void)pcTaskName;
+
+    printf("***ERROR*** A stack overflow in task %s has been detected.\r\n", pcTaskName);
 
     taskDISABLE_INTERRUPTS();
-    TU_ASSERT(false, );
+
+    while (1) {};
 }
 
 /* configSUPPORT_STATIC_ALLOCATION is set to 1, so the application must provide an

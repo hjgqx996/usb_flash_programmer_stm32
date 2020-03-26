@@ -10,13 +10,15 @@
 #include "stm32f1xx_hal.h"
 
 #include "FreeRTOS.h"
-#include "task.h"
+#include "event_groups.h"
 #include "ringbuf.h"
+#include "task.h"
 
 #include "sfud.h"
 #include "tusb.h"
 
 #include "core/os.h"
+#include "user/led.h"
 
 #define MTD_TAG "mtd"
 
@@ -29,7 +31,9 @@
 #define mtd_send_data(X, N) \
     do { \
         tud_cdc_write((void const *)X, (uint32_t)N); \
-        tud_cdc_write_flush(); \
+        while (tud_cdc_write_flush() == 0) { \
+            taskYIELD(); \
+        } \
     } while (0)
 
 #define CMD_FMT_ERASE_ALL   "MTD+ERASE:ALL!"
@@ -114,6 +118,12 @@ static void mtd_write_task(void *pvParameter)
 
     OS_LOGI(MTD_TAG, "write started.");
 
+    xEventGroupSetBits(user_event_group, USB_CDC_DATA_BIT);
+
+    tud_cdc_set_wanted_char(-1);
+
+    led_set_mode(5);
+
     while ((data_addr - addr) != length) {
         if (!conn_state || !data_recv) {
             OS_LOGE(MTD_TAG, "write aborted.");
@@ -124,9 +134,9 @@ static void mtd_write_task(void *pvParameter)
         uint32_t remain = length - (data_addr - addr);
 
         if (remain >= 64) {
-            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 1 / portTICK_RATE_MS, 64);
+            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 10 / portTICK_RATE_MS, 64);
         } else {
-            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 1 / portTICK_RATE_MS, remain);
+            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 10 / portTICK_RATE_MS, remain);
         }
 
         if (data == NULL) {
@@ -161,6 +171,15 @@ write_fail:
     data_recv = false;
     conn_state = false;
 
+    led_set_mode(3);
+
+    tud_cdc_read_flush();
+    tud_cdc_write_flush();
+
+    tud_cdc_set_wanted_char('M');
+
+    xEventGroupClearBits(user_event_group, USB_CDC_DATA_BIT);
+
     vTaskDelete(NULL);
 }
 
@@ -171,6 +190,8 @@ static void mtd_read_task(void *pvParameter)
     sfud_err err = SFUD_SUCCESS;
 
     OS_LOGI(MTD_TAG, "read started.");
+
+    led_set_mode(5);
 
     uint32_t pkt = 0;
     for (pkt=0; pkt<length/64; pkt++) {
@@ -184,16 +205,6 @@ static void mtd_read_task(void *pvParameter)
             mtd_send_response(RSP_IDX_FAIL);
 
             goto read_fail;
-        }
-
-        while (tud_cdc_write_flush() == 0) {
-            taskYIELD();
-
-            if (!conn_state) {
-                OS_LOGE(MTD_TAG, "read aborted.");
-
-                goto read_fail;
-            }
         }
 
         if (!conn_state) {
@@ -219,16 +230,6 @@ static void mtd_read_task(void *pvParameter)
             goto read_fail;
         }
 
-        while (tud_cdc_write_flush() == 0) {
-            taskYIELD();
-
-            if (!conn_state) {
-                OS_LOGE(MTD_TAG, "read aborted.");
-
-                goto read_fail;
-            }
-        }
-
         if (!conn_state) {
             OS_LOGE(MTD_TAG, "read aborted.");
 
@@ -242,6 +243,11 @@ static void mtd_read_task(void *pvParameter)
 
 read_fail:
     conn_state = false;
+
+    led_set_mode(3);
+
+    tud_cdc_read_flush();
+    tud_cdc_write_flush();
 
     vTaskDelete(NULL);
 }
@@ -279,7 +285,11 @@ void mtd_exec(uint8_t *data, uint32_t len)
 
                     OS_LOGI(MTD_TAG, "chip erase started.");
 
+                    led_set_mode(5);
+
                     err = sfud_chip_erase(flash);
+
+                    led_set_mode(3);
 
                     if (err != SFUD_SUCCESS) {
                         OS_LOGE(MTD_TAG, "chip erase failed.");
@@ -314,7 +324,11 @@ void mtd_exec(uint8_t *data, uint32_t len)
 
                         OS_LOGI(MTD_TAG, "erase started.");
 
+                        led_set_mode(5);
+
                         err = sfud_erase(flash, addr, length);
+
+                        led_set_mode(3);
 
                         if (err != SFUD_SUCCESS) {
                             OS_LOGE(MTD_TAG, "erase failed.");
@@ -353,12 +367,12 @@ void mtd_exec(uint8_t *data, uint32_t len)
                         data_addr = addr;
                         flash = sfud_get_device(SFUD_TARGET_DEVICE_INDEX);
 
+                        mtd_send_response(RSP_IDX_OK);
+
                         memset(&buff_struct, 0x00, sizeof(StaticRingbuffer_t));
                         mtd_buff = xRingbufferCreateStatic(sizeof(buff_data), RINGBUF_TYPE_BYTEBUF, buff_data, &buff_struct);
 
                         xTaskCreateStatic(mtd_write_task, "mtdWriteT", WRITE_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, write_task_stack, &write_task_struct);
-
-                        mtd_send_response(RSP_IDX_OK);
                     }
                 } else {
                     mtd_send_response(RSP_IDX_ERROR);

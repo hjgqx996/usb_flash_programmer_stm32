@@ -8,6 +8,7 @@
 #include "stm32f1xx_hal.h"
 
 #include "FreeRTOS.h"
+#include "event_groups.h"
 #include "task.h"
 
 #include "tusb.h"
@@ -17,64 +18,86 @@
 
 #define TAG "usbd_cdc"
 
-#define CDC_STACK_SIZE 256
+#define CDC_STACK_SIZE 512
 
 static StackType_t stack_cdc[CDC_STACK_SIZE];
 static StaticTask_t static_task_cdc;
 
-// invoked when cdc when line state changed e.g connected / disconnected
+static uint8_t recv_buff[64] = {0};
+static uint32_t recv_size = 0;
+
 void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
 {
     (void)itf;
 
     if (dtr && rts) {
         OS_LOGI(TAG, "connected.");
-
-        tud_cdc_read_flush();
-        tud_cdc_write_flush();
     }
 
     if (!dtr && !rts) {
+        xEventGroupClearBits(user_event_group, USB_CDC_DATA_BIT);
+
         OS_LOGI(TAG, "disconnected.");
 
         mtd_end();
-
-        tud_cdc_read_flush();
-        tud_cdc_write_flush();
     }
 }
 
-// invoked when CDC interface received data from host
-void tud_cdc_rx_cb(uint8_t itf)
+void tud_cdc_rx_wanted_cb(uint8_t itf, char wanted_char)
 {
     (void)itf;
+
+    EventBits_t uxBits = xEventGroupGetBits(user_event_group);
+    if (!(uxBits & USB_CDC_DATA_BIT)) {
+        switch (wanted_char) {
+        case 'M':
+            tud_cdc_set_wanted_char('\n');
+            break;
+        case '\n':
+            recv_size = tud_cdc_available();
+
+            tud_cdc_set_wanted_char('M');
+
+            xEventGroupSetBits(user_event_group, USB_CDC_CMD_BIT);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void usbd_cdc_task(void *pvParameter)
 {
     (void)pvParameter;
-    uint8_t data[64] = {0};
-    uint32_t size = 0;
-    uint16_t count = 0;
 
     OS_LOGI(TAG, "started.");
 
+    tud_cdc_set_wanted_char('M');
+
     while (1) {
-        if (tud_cdc_connected()) {
-            if ((size = tud_cdc_available()) != 0) {
-                if ((size != 64) && (++count < 200)) {
-                    vTaskDelay(1 / portTICK_RATE_MS);
+        xEventGroupWaitBits(
+            user_event_group,
+            USB_CDC_CMD_BIT | USB_CDC_DATA_BIT,
+            pdFALSE,
+            pdFALSE,
+            portMAX_DELAY
+        );
 
-                    continue;
-                }
+        EventBits_t uxBits = xEventGroupGetBits(user_event_group);
+        if (uxBits & USB_CDC_CMD_BIT) {
+            xEventGroupClearBits(user_event_group, USB_CDC_CMD_BIT);
 
-                count = 0;
+            tud_cdc_read(recv_buff, recv_size);
 
-                tud_cdc_read(data, size);
-                tud_cdc_read_flush();
+            mtd_exec(recv_buff, recv_size);
 
-                mtd_exec(data, size);
-            }
+            continue;
+        }
+
+        if ((recv_size = tud_cdc_available()) != 0) {
+            tud_cdc_read(recv_buff, recv_size);
+
+            mtd_exec(recv_buff, recv_size);
         }
 
         taskYIELD();

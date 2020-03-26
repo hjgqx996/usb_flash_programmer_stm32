@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "FreeRTOS.h"
+#include "event_groups.h"
 
 #define LOG_COLOR_BLACK   "30"
 #define LOG_COLOR_RED     "31"
@@ -33,6 +34,13 @@
 #define OS_LOGE(tag, format, ...) printf(LOG_FORMAT(E, format), xTaskGetTickCount(), tag, ##__VA_ARGS__)
 #define OS_LOGW(tag, format, ...) printf(LOG_FORMAT(W, format), xTaskGetTickCount(), tag, ##__VA_ARGS__)
 #define OS_LOGI(tag, format, ...) printf(LOG_FORMAT(I, format), xTaskGetTickCount(), tag, ##__VA_ARGS__)
+
+typedef enum user_event_group_bits {
+    USB_CDC_CMD_BIT  = 0b0001,
+    USB_CDC_DATA_BIT = 0b0010,
+} user_event_group_bits_t;
+
+extern EventGroupHandle_t user_event_group;
 
 extern void os_start(void);
 extern void os_init(void);

@@ -33,7 +33,7 @@ tusb_desc_device_t const desc_device =
 
     .idVendor           = 0xcafe,
     .idProduct          = USB_PID,
-    .bcdDevice          = 0x0100,
+    .bcdDevice          = 0x0200,
 
     .iManufacturer      = 0x01,
     .iProduct           = 0x02,
@@ -81,7 +81,7 @@ uint8_t const *tud_descriptor_configuration_cb(uint8_t index)
 
 // String Descriptors
 char const *string_desc_arr[] = {
-    (const char[]) {0x09, 0x04},   // 0: Language, English (0x0409)
+    (const char[]){0x09, 0x04},    // 0: Language, English (0x0409)
     "TinyUSB",                     // 1: Manufacturer
     "TinyUSB Device",              // 2: Product
     "123456",                      // 3: Serials, should use chip ID
