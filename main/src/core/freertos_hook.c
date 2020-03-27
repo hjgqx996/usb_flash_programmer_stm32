@@ -12,7 +12,7 @@
 
 #include "common/tusb_common.h"
 
-void vApplicationStackOverflowHook(xTaskHandle pxTask, signed char *pcTaskName)
+void vApplicationStackOverflowHook(TaskHandle_t pxTask, signed char *pcTaskName)
 {
     (void)pxTask;
 

@@ -41,7 +41,7 @@ static void led_task(void *pvParameter)
     (void)pvParameter;
 
     uint16_t i = 0;
-    portTickType xLastWakeTime;
+    TickType_t xLastWakeTime;
 
     OS_LOGI(TAG, "started.");
 
@@ -54,7 +54,7 @@ static void led_task(void *pvParameter)
             HAL_GPIO_WritePin(LED1_GPIO_PORT, LED1_GPIO_PIN, GPIO_PIN_SET);
         }
 
-        vTaskDelayUntil(&xLastWakeTime, led_mode_table[led_mode_index][0] / portTICK_RATE_MS);
+        vTaskDelayUntil(&xLastWakeTime, led_mode_table[led_mode_index][0] / portTICK_PERIOD_MS);
     }
 }
 

@@ -45,6 +45,7 @@ CFLAGS += \
 	-Wmissing-format-attribute \
 	-Wno-deprecated-declarations \
 	-Wunreachable-code \
+	-Wno-error=unused-function \
 	-Wno-error=unused-parameter \
 	-Wno-error=lto-type-mismatch \
 	-ffunction-sections \

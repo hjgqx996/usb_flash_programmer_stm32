@@ -134,9 +134,9 @@ static void mtd_write_task(void *pvParameter)
         uint32_t remain = length - (data_addr - addr);
 
         if (remain >= 64) {
-            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 10 / portTICK_RATE_MS, 64);
+            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 10 / portTICK_PERIOD_MS, 64);
         } else {
-            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 10 / portTICK_RATE_MS, remain);
+            data = (uint8_t *)xRingbufferReceiveUpTo(mtd_buff, (size_t *)&size, 10 / portTICK_PERIOD_MS, remain);
         }
 
         if (data == NULL) {
