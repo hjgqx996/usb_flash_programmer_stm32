@@ -1,5 +1,6 @@
 include $(PWD)/make/top.mk
-include $(PWD)/make/common.mk
+
+PROJECT_NAME = usb_flash_programmer
 
 SFUD_SRC = components/sfud
 TUSB_SRC = components/tinyusb
@@ -47,6 +48,9 @@ SRC_C += \
 SRC_S += \
 	$(ST_CMSIS)/Source/Templates/gcc/startup_stm32f103xb.s
 
+LD_FILE = \
+	$(ST_CMSIS)/Source/Templates/gcc/linker/STM32F103XB_FLASH.ld
+
 INC += \
 	$(SFUD_SRC)/inc \
 	$(TUSB_SRC)/src \
@@ -77,7 +81,6 @@ CFLAGS += \
 
 ASFLAGS += $(CFLAGS)
 
-LD_FILE = $(PWD)/STM32F103C8TX_FLASH.ld
 LDFLAGS += \
 	$(CFLAGS) \
 	-fshort-enums \
@@ -91,7 +94,8 @@ LDFLAGS += \
 
 LIBS += -lgcc -lc -lm -lnosys
 
-JLINK_DEVICE = stm32f103c8
+JLINK_DEVICE = stm32f103cb
 JLINK_IF = swd
 
+include $(PWD)/make/common.mk
 include $(PWD)/make/project.mk

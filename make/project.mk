@@ -19,22 +19,22 @@ endif
 
 # Set all as default goal
 .DEFAULT_GOAL := all
-all: $(BUILD)/firmware.bin $(BUILD)/firmware.hex size
+all: $(BUILD)/$(PROJECT_NAME).bin $(BUILD)/$(PROJECT_NAME).hex size
 
 OBJ_DIRS = $(sort $(dir $(OBJ)))
 $(OBJ): | $(OBJ_DIRS)
 $(OBJ_DIRS):
 	@$(MKDIR) -p $@
 
-$(BUILD)/firmware.elf: $(OBJ)
+$(BUILD)/$(PROJECT_NAME).elf: $(OBJ)
 	@echo LINK $@
 	@$(CC) -o $@ $(LDFLAGS) $^ -Wl,--start-group $(LIBS) -Wl,--end-group
 
-$(BUILD)/firmware.bin: $(BUILD)/firmware.elf
+$(BUILD)/$(PROJECT_NAME).bin: $(BUILD)/$(PROJECT_NAME).elf
 	@echo CREATE $@
 	@$(OBJCOPY) -O binary $^ $@
 
-$(BUILD)/firmware.hex: $(BUILD)/firmware.elf
+$(BUILD)/$(PROJECT_NAME).hex: $(BUILD)/$(PROJECT_NAME).elf
 	@echo CREATE $@
 	@$(OBJCOPY) -O ihex $^ $@
 
@@ -65,7 +65,7 @@ $(BUILD)/obj/%.o: %.S
 	@echo AS $(notdir $@)
 	@$(CC) -x assembler-with-cpp $(ASFLAGS) -c -o $@ $<
 
-size: $(BUILD)/firmware.elf
+size: $(BUILD)/$(PROJECT_NAME).elf
 	-@echo ''
 	@$(SIZE) $<
 	-@echo ''
@@ -79,11 +79,11 @@ else
     JLINKEXE = JLinkExe
 endif
 
-flash: $(BUILD)/firmware.hex
-	@echo halt > $(BUILD)/flash.jlink
-	@echo r > $(BUILD)/flash.jlink
-	@echo loadfile $^ >> $(BUILD)/flash.jlink
-	@echo r >> $(BUILD)/flash.jlink
-	@echo go >> $(BUILD)/flash.jlink
-	@echo exit >> $(BUILD)/flash.jlink
-	$(JLINKEXE) -device $(JLINK_DEVICE) -if $(JLINK_IF) -JTAGConf -1,-1 -speed auto -CommandFile $(BUILD)/flash.jlink
+flash: $(BUILD)/$(PROJECT_NAME).hex
+	@echo halt > $(BUILD)/$(PROJECT_NAME).jlink
+	@echo r > $(BUILD)/$(PROJECT_NAME).jlink
+	@echo loadfile $^ >> $(BUILD)/$(PROJECT_NAME).jlink
+	@echo r >> $(BUILD)/$(PROJECT_NAME).jlink
+	@echo go >> $(BUILD)/$(PROJECT_NAME).jlink
+	@echo exit >> $(BUILD)/$(PROJECT_NAME).jlink
+	$(JLINKEXE) -device $(JLINK_DEVICE) -if $(JLINK_IF) -JTAGConf -1,-1 -speed auto -CommandFile $(BUILD)/$(PROJECT_NAME).jlink
