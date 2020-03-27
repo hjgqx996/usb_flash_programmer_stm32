@@ -372,7 +372,7 @@ void mtd_exec(uint8_t *data, uint32_t len)
                         memset(&buff_struct, 0x00, sizeof(StaticRingbuffer_t));
                         mtd_buff = xRingbufferCreateStatic(sizeof(buff_data), RINGBUF_TYPE_BYTEBUF, buff_data, &buff_struct);
 
-                        xTaskCreateStatic(mtd_write_task, "mtdWriteT", WRITE_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, write_task_stack, &write_task_struct);
+                        xTaskCreateStatic(mtd_write_task, "mtdWriteT", WRITE_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, write_task_stack, &write_task_struct);
                     }
                 } else {
                     mtd_send_response(RSP_IDX_ERROR);
@@ -401,7 +401,7 @@ void mtd_exec(uint8_t *data, uint32_t len)
 
                         mtd_send_response(RSP_IDX_OK);
 
-                        xTaskCreateStatic(mtd_read_task, "mtdReadT", READ_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, read_task_stack, &read_task_struct);
+                        xTaskCreateStatic(mtd_read_task, "mtdReadT", READ_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, read_task_stack, &read_task_struct);
                     }
                 } else {
                     mtd_send_response(RSP_IDX_ERROR);

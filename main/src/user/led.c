@@ -68,5 +68,5 @@ void led_set_mode(uint8_t idx)
 
 void led_init(void)
 {
-    xTaskCreateStatic(led_task, "ledT", LED_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, stack_led, &static_task_led);
+    xTaskCreateStatic(led_task, "ledT", LED_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, stack_led, &static_task_led);
 }

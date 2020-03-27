@@ -35,11 +35,11 @@ void tud_cdc_line_state_cb(uint8_t itf, bool dtr, bool rts)
     }
 
     if (!dtr && !rts) {
-        xEventGroupClearBits(user_event_group, USB_CDC_DATA_BIT);
-
         OS_LOGI(TAG, "disconnected.");
 
         mtd_end();
+
+        xEventGroupClearBits(user_event_group, USB_CDC_DATA_BIT);
     }
 }
 
@@ -106,5 +106,5 @@ void usbd_cdc_task(void *pvParameter)
 
 void usbd_cdc_init(void)
 {
-    xTaskCreateStatic(usbd_cdc_task, "usbdCdcT", CDC_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, stack_cdc, &static_task_cdc);
+    xTaskCreateStatic(usbd_cdc_task, "usbdCdcT", CDC_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, stack_cdc, &static_task_cdc);
 }

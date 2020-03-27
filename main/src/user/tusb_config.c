@@ -33,7 +33,7 @@ tusb_desc_device_t const desc_device =
 
     .idVendor           = 0xcafe,
     .idProduct          = USB_PID,
-    .bcdDevice          = 0x0200,
+    .bcdDevice          = 0x0100,
 
     .iManufacturer      = 0x01,
     .iProduct           = 0x02,
