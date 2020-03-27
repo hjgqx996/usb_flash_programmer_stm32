@@ -1,5 +1,5 @@
 /*
- * usbd_cdc.c
+ * usb_cdc.c
  *
  *  Created on: 2020-03-24 20:57
  *      Author: Jack Chen <redchenjs@live.com>
@@ -16,7 +16,7 @@
 #include "core/os.h"
 #include "user/mtd.h"
 
-#define TAG "usbd_cdc"
+#define TAG "usb_cdc"
 
 #define CDC_STACK_SIZE 512
 
@@ -66,7 +66,7 @@ void tud_cdc_rx_wanted_cb(uint8_t itf, char wanted_char)
     }
 }
 
-void usbd_cdc_task(void *pvParameter)
+void usb_cdc_task(void *pvParameter)
 {
     (void)pvParameter;
 
@@ -104,7 +104,7 @@ void usbd_cdc_task(void *pvParameter)
     }
 }
 
-void usbd_cdc_init(void)
+void usb_cdc_init(void)
 {
-    xTaskCreateStatic(usbd_cdc_task, "usbdCdcT", CDC_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, stack_cdc, &static_task_cdc);
+    xTaskCreateStatic(usb_cdc_task, "usbCdcT", CDC_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, stack_cdc, &static_task_cdc);
 }

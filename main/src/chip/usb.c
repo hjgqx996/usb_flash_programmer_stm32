@@ -7,7 +7,7 @@
 
 #include "stm32f1xx_hal.h"
 
-void usb_init(void)
+void usbd_init(void)
 {
     __HAL_RCC_USB_CLK_ENABLE();
 

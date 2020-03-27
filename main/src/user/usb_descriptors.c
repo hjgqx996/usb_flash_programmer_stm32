@@ -1,5 +1,5 @@
 /*
- * tusb_config.c
+ * usb_descriptors.c
  *
  *  Created on: 2020-03-24 18:33
  *      Author: Jack Chen <redchenjs@live.com>

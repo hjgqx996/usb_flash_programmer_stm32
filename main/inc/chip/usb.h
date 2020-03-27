@@ -8,6 +8,6 @@
 #ifndef INC_CHIP_USB_H_
 #define INC_CHIP_USB_H_
 
-extern void usb_init(void);
+extern void usbd_init(void);
 
 #endif /* INC_CHIP_USB_H_ */

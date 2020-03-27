@@ -1,5 +1,5 @@
 /*
- * usbd.c
+ * usb.c
  *
  *  Created on: 2020-03-24 20:52
  *      Author: Jack Chen <redchenjs@live.com>
@@ -14,14 +14,14 @@
 
 #include "core/os.h"
 
-#define TAG "usbd"
+#define TAG "usb"
 
-#define USBD_STACK_SIZE 150
+#define USB_STACK_SIZE 150
 
-static StackType_t stack_usbd[USBD_STACK_SIZE];
-static StaticTask_t static_task_usbd;
+static StackType_t stack_usb[USB_STACK_SIZE];
+static StaticTask_t static_task_usb;
 
-void usbd_task(void *pvParameter)
+void usb_task(void *pvParameter)
 {
     (void)pvParameter;
 
@@ -34,7 +34,7 @@ void usbd_task(void *pvParameter)
     }
 }
 
-void usbd_init(void)
+void usb_init(void)
 {
-    xTaskCreateStatic(usbd_task, "usbdT", USBD_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, stack_usbd, &static_task_usbd);
+    xTaskCreateStatic(usb_task, "usbT", USB_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, stack_usb, &static_task_usb);
 }

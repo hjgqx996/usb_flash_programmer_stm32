@@ -16,8 +16,8 @@
 #include "board/flash.h"
 
 #include "user/led.h"
-#include "user/usbd.h"
-#include "user/usbd_cdc.h"
+#include "user/usb.h"
+#include "user/usb_cdc.h"
 
 static void core_init(void)
 {
@@ -28,7 +28,7 @@ static void chip_init(void)
 {
     rcc_init();
 
-    usb_init();
+    usbd_init();
 
     hspi1_init();
 
@@ -46,9 +46,9 @@ static void user_init(void)
 {
     led_init();
 
-    usbd_init();
+    usb_init();
 
-    usbd_cdc_init();
+    usb_cdc_init();
 
     os_start();
 }
