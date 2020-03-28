@@ -26,4 +26,8 @@ void usbd_init(void)
         .Speed = GPIO_SPEED_FREQ_HIGH,
     };
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    HAL_NVIC_SetPriority(USB_HP_CAN1_TX_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(USB_LP_CAN1_RX0_IRQn, 5, 0);
+    HAL_NVIC_SetPriority(USBWakeUp_IRQn, 5, 0);
 }

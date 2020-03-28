@@ -24,12 +24,16 @@
 
 #define mtd_send_response(X) \
     do { \
-        tud_cdc_write((void const *)rsp_str[X], strlen(rsp_str[X])); \
         tud_cdc_write_flush(); \
+        tud_cdc_write((void const *)rsp_str[X], strlen(rsp_str[X])); \
+        while (tud_cdc_write_flush() == 0) { \
+            taskYIELD(); \
+        } \
     } while (0)
 
 #define mtd_send_data(X, N) \
     do { \
+        tud_cdc_write_flush(); \
         tud_cdc_write((void const *)X, (uint32_t)N); \
         while (tud_cdc_write_flush() == 0) { \
             taskYIELD(); \
@@ -85,14 +89,6 @@ static uint8_t buff_data[64] = {0};
 static StaticRingbuffer_t buff_struct = {0};
 
 static RingbufHandle_t mtd_buff = NULL;
-
-#define WRITE_STACK_SIZE 1024
-static StackType_t write_task_stack[WRITE_STACK_SIZE] = {0};
-static StaticTask_t write_task_struct = {0};
-
-#define READ_STACK_SIZE 1024
-static StackType_t read_task_stack[READ_STACK_SIZE] = {0};
-static StaticTask_t read_task_struct = {0};
 
 static uint32_t data_addr = 0;
 static uint32_t addr = 0, length = 0;
@@ -372,7 +368,7 @@ void mtd_exec(uint8_t *data, uint32_t len)
                         memset(&buff_struct, 0x00, sizeof(StaticRingbuffer_t));
                         mtd_buff = xRingbufferCreateStatic(sizeof(buff_data), RINGBUF_TYPE_BYTEBUF, buff_data, &buff_struct);
 
-                        xTaskCreateStatic(mtd_write_task, "mtdWriteT", WRITE_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, write_task_stack, &write_task_struct);
+                        xTaskCreate(mtd_write_task, "mtdWriteT", 1024, NULL, 9, NULL);
                     }
                 } else {
                     mtd_send_response(RSP_IDX_ERROR);
@@ -401,7 +397,7 @@ void mtd_exec(uint8_t *data, uint32_t len)
 
                         mtd_send_response(RSP_IDX_OK);
 
-                        xTaskCreateStatic(mtd_read_task, "mtdReadT", READ_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, read_task_stack, &read_task_struct);
+                        xTaskCreate(mtd_read_task, "mtdReadT", 1024, NULL, 9, NULL);
                     }
                 } else {
                     mtd_send_response(RSP_IDX_ERROR);

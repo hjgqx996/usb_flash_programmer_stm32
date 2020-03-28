@@ -18,11 +18,6 @@
 
 #define TAG "usb_cdc"
 
-#define CDC_STACK_SIZE 512
-
-static StackType_t stack_cdc[CDC_STACK_SIZE];
-static StaticTask_t static_task_cdc;
-
 static uint8_t recv_buff[64] = {0};
 static uint32_t recv_size = 0;
 
@@ -106,5 +101,5 @@ void usb_cdc_task(void *pvParameter)
 
 void usb_cdc_init(void)
 {
-    xTaskCreateStatic(usb_cdc_task, "usbCdcT", CDC_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, stack_cdc, &static_task_cdc);
+    xTaskCreate(usb_cdc_task, "usbCdcT", 384, NULL, 9, NULL);
 }

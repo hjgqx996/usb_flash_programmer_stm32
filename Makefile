@@ -35,6 +35,7 @@ SRC_C += \
 	$(FREERTOS_SRC)/tasks.c \
 	$(FREERTOS_SRC)/timers.c \
 	$(FREERTOS_SRC)/event_groups.c \
+	$(FREERTOS_SRC)/portable/MemMang/heap_4.c \
 	$(FREERTOS_SRC)/portable/GCC/$(FREERTOS_PORT)/port.c \
 	$(ST_CMSIS)/Source/Templates/system_stm32f1xx.c \
 	$(ST_HAL_DRIVER)/Src/stm32f1xx_hal.c \

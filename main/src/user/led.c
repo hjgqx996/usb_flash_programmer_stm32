@@ -15,11 +15,6 @@
 
 #define TAG "led"
 
-#define LED_STACK_SIZE 128
-
-static StackType_t stack_led[LED_STACK_SIZE];
-static StaticTask_t static_task_led;
-
 static const uint16_t led_mode_table[][2] = {
 /*  { delay, count}  */
     {     0,     2},   // 0, Keep off
@@ -68,5 +63,5 @@ void led_set_mode(uint8_t idx)
 
 void led_init(void)
 {
-    xTaskCreateStatic(led_task, "ledT", LED_STACK_SIZE, NULL, configMAX_PRIORITIES - 3, stack_led, &static_task_led);
+    xTaskCreate(led_task, "ledT", 128, NULL, 9, NULL);
 }

@@ -22,6 +22,8 @@ static StaticEventGroup_t static_event_group;
 
 EventGroupHandle_t user_event_group;
 
+const volatile uint8_t freeRTOSMemoryScheme = configUSE_HEAP_SCHEME;
+
 int __attribute__((used)) _write(int file, char *ptr, int len)
 {
     (void)file;
@@ -35,6 +37,7 @@ void _init(void) {}
 
 void os_start(void)
 {
+    OS_LOGI(TAG, "FreeRTOS memory scheme: %d", freeRTOSMemoryScheme);
     OS_LOGI(TAG, "Starting scheduler...");
 
     vTaskStartScheduler();

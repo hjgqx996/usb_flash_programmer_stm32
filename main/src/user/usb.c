@@ -16,11 +16,6 @@
 
 #define TAG "usb"
 
-#define USB_STACK_SIZE 150
-
-static StackType_t stack_usb[USB_STACK_SIZE];
-static StaticTask_t static_task_usb;
-
 void usb_task(void *pvParameter)
 {
     (void)pvParameter;
@@ -36,5 +31,5 @@ void usb_task(void *pvParameter)
 
 void usb_init(void)
 {
-    xTaskCreateStatic(usb_task, "usbT", USB_STACK_SIZE, NULL, configMAX_PRIORITIES - 2, stack_usb, &static_task_usb);
+    xTaskCreate(usb_task, "usbT", 150, NULL, configMAX_PRIORITIES - 2, NULL);
 }
